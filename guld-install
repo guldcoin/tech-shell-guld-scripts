@@ -52,7 +52,7 @@ if [ ! -n "$signingkey" ]; then
 fi
 commitsign=$(git config commit.sign)
 if [ ! -n "$commitsign" ]; then
-    git config --global commit.sign true
+    git config --global commit.gpgsign true
 fi
 
 # initialize pass
