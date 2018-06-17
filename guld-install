@@ -30,29 +30,29 @@ username=$(git config user.username)
 if [ ! -n "$username" ]; then
     echo "What is your personal guld name?"
     read username
-    git config user.username $username
+    git config --global user.username $username
 fi
 name=$(git config user.name)
 if [ ! -n "$name" ]; then
     echo "What is your public full name? (optional)"
     read name
-    git config user.name $name
+    git config --global user.name $name
 fi
 email=$(git config user.email)
 if [ ! -n "$email" ]; then
     echo "What is your public email address? (optional)"
     read email
-    git config user.email $email
+    git config --global user.email $email
 fi
 signingkey=$(git config user.signingkey)
 if [ ! -n "$signingkey" ]; then
     echo "Which of these is your PGP key id? (blank for group)"
     read signingkey
-    git config user.signingkey $signingkey
+    git config --global user.signingkey $signingkey
 fi
 commitsign=$(git config commit.sign)
 if [ ! -n "$commitsign" ]; then
-    git config commit.sign true
+    git config --global commit.sign true
 fi
 
 # initialize pass
@@ -73,7 +73,7 @@ if [ ! -n "$ghname" ] && [ ! -n "$bbname" ] && [ ! -n "$glname" ]; then
     echo "What is your github username? (blank for none)"
     read ghname
     if [ -n $ghname ]; then
-        git config host.github $ghname
+        git config --global host.github $ghname
         echo "What is your github password? (to be encrypted)"
         read -s ghpass
         printf "$ghpass\nlogin: $ghname\nurl: github.com" | gpg2 --encrypt -o "$HOME/.password-store/$USER/git/github.gpg" -r $signingkey
@@ -81,7 +81,7 @@ if [ ! -n "$ghname" ] && [ ! -n "$bbname" ] && [ ! -n "$glname" ]; then
     echo "What is your bitbucket username? (blank for none)"
     read bbname
     if [ -n "$bbname" ]; then
-        git config host.bitbucket $bbname
+        git config --global host.bitbucket $bbname
         echo "What is your bitbucket password? (to be encrypted)"
         read -s bbpass
         printf "$bbpass\nlogin: $bbname\nurl: bitbucket.org" | gpg2 --encrypt -o "$HOME/.password-store/$USER/git/bitbucket.gpg" -r $signingkey
@@ -89,7 +89,7 @@ if [ ! -n "$ghname" ] && [ ! -n "$bbname" ] && [ ! -n "$glname" ]; then
     echo "What is your gitlab username? (blank for none)"
     read glname
     if [ -n $glname ]; then
-        git config host.gitlab $glname
+        git config --global host.gitlab $glname
         echo "What is your gitlab password? (to be encrypted)"
         read -s glpass
         printf "$glpass\nlogin: $glname\nurl: gitlab.org" | gpg2 --encrypt -o "$HOME/.password-store/$USER/git/gitlab.gpg" -r $signingkey
