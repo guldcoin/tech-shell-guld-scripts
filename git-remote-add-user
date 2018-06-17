@@ -1,31 +1,35 @@
 #!/bin/bash
+if [ -n "$1" ]; then
+    username=$1
+else
+    user=$USER
+fi
 p=$(pwd)
-home=/home/$USER
 if [ "$p" == "/home" ]; then
     ghp=blocktree
-elif [ "$p" == "$home" ]; then
-    ghp=$USER
+elif [ "$p" == "$HOME" ]; then
+    ghp=$username
 else
-    n=${#home}
+    n=${#HOME}+1
     p=${p:$n}
     ghp=${p//\//-}
 fi
-username=$(git config --file /home/$USER/.gitconfig user.username)
-glname=$(git config --file /home/$USER/.gitconfig host.gitlab)
+username=$(git config --file /home/$username/.gitconfig user.username)
+glname=$(git config --file /home/$username/.gitconfig host.gitlab)
 if [ -n "$glname" ]; then
     $(git remote add $username-gl git@gitlab.org:$glname/$ghp.git)
     $(git remote set-url $username-gl git@gitlab.org:$glname/$ghp.git)
     $(git remote add $username git@gitlab.org:$glname/$ghp.git)
     $(git remote set-url $username git@gitlab.org:$glname/$ghp.git)
 fi
-ghname=$(git config --file /home/$USER/.gitconfig host.github)
+ghname=$(git config --file /home/$username/.gitconfig host.github)
 if [ -n "$ghname" ]; then
     $(git remote add $username-gh git@github.com:$ghname/$ghp.git)
     $(git remote set-url $username-gh git@github.com:$ghname/$ghp.git)
     $(git remote add $username git@github.com:$ghname/$ghp.git)
     $(git remote set-url $username git@github.com:$ghname/$ghp.git)
 fi
-bbname=$(git config --file /home/$USER/.gitconfig host.bitbucket)
+bbname=$(git config --file /home/$username/.gitconfig host.bitbucket)
 if [ -n "$bbname" ]; then
     $(git remote add $username-bb git@bitbucket.org:$bbname/$ghp.git)
     $(git remote set-url $username-bb git@bitbucket.org:$bbname/$ghp.git)
