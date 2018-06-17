@@ -1,0 +1,10 @@
+#!/bin/bash
+p=$(pwd)
+while [ $p != '/home' ]; do
+    git add -A
+    git commit -m "update"
+    git push $USER $USER
+    cd ..
+    p=$(pwd)
+done
+
