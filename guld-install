@@ -20,7 +20,10 @@ if [ ! -f $HOME/.ssh/id_rsa ]; then
 fi
 
 # generate pgp key if not done already
-if [ ! -f $HOME/.gnupg/secring.gpg ]; then
+# get list twice in case first time is init
+keylist=$(gpg2 --list-secret-keys)
+keylist=$(gpg2 --list-secret-keys)
+if [ ! -n keylist ]; then
     echo "please generate a PGP key"
     gpg2 --full-generate-key
 fi
@@ -47,6 +50,7 @@ fi
 signingkey=$(git config user.signingkey)
 if [ ! -n "$signingkey" ]; then
     echo "Which of these is your PGP key id? (blank for group)"
+    echo "$keylist"
     read signingkey
     git config --global user.signingkey $signingkey
 fi
