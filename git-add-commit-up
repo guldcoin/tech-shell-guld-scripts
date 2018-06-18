@@ -14,9 +14,7 @@ git fetch $USER
 git merge $USER/$USER
 cd ..
 git add blocktree
-echo $last
 last=${last/$HOME\//}
-echo $last
 git add "$last"
 status=$(git status -s)
 if [ -n "$status" ]; then
