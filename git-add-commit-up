@@ -18,7 +18,8 @@ echo $last
 last=${last/$HOME\//}
 echo $last
 git add "$last"
-if [ -n $(git status -s) ]; then
+status=$(git status -s)
+if [ -n "$status" ]; then
     git commit -m "update"
     git push $USER $USER
     cd ..
