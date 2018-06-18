@@ -1,0 +1,24 @@
+#!/bin/bash
+ghpass=""
+ghlogin=""
+for p in $(pass $USER/git/github); do
+    if [ ! -n "$ghpass" ]; then
+        ghpass=$p
+    elif [ "$p" == "login:" ]; then
+        continue
+    elif [ ! -n "$ghlogin" ]; then
+        ghlogin=$p
+    else
+        break
+    fi
+done
+if [ ! -n "$1" ]; then
+    echo "usage:"
+    echo "    gh-create-repo name <organization>"
+    echo "        If no organization is provided, the repo will be created for your user"
+elif [ -n "$2" ]; then
+    curl -u $ghlogin:$ghpass https://api.github.com/orgs/$2/repos -d "{ \"name\": \"$1\" }"
+else
+    curl -u $ghlogin:$ghpass https://api.github.com/user/repos -d "{ \"name\": \"$1\" }"
+fi
+
