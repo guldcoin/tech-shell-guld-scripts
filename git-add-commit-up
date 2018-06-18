@@ -1,10 +1,23 @@
 #!/bin/bash
 p=$(pwd)
-while [ $p != '/home' ]; do
+while [ $p != $HOME ]; do
     git add -A
     git commit -m "update"
     git push $USER $USER
     cd ..
     p=$(pwd)
 done
-
+cd blocktree
+git fetch $USER
+git merge $USER/$USER
+cd ..
+git add blocktree
+git add ${p/$HOME/}
+if [ -n $(git status -s) ]; then
+    git commit -m "update"
+    git push $USER $USER
+    cd ..
+    git add $USER
+    git commit -m "update"
+    git push $USER $USER
+fi
