@@ -1,6 +1,8 @@
 #!/bin/bash
 p=$(pwd)
+last=$p
 while [ $p != $HOME ]; do
+    last=$p
     git add -A
     git commit -m "update"
     git push $USER $USER
@@ -12,8 +14,8 @@ git fetch $USER
 git merge $USER/$USER
 cd ..
 git add blocktree
-echo $p
-last=${p/$HOME/}
+echo $last
+last=${last/$HOME/}
 echo $last
 git add "$last"
 if [ -n $(git status -s) ]; then
