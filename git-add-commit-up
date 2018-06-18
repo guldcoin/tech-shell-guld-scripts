@@ -9,11 +9,11 @@ while [ $p != $HOME ]; do
     cd ..
     p=$(pwd)
 done
-cd blocktree
+cd .blocktree
 git fetch $USER
 git merge $USER/$USER
 cd ..
-git add blocktree
+git add .blocktree
 last=${last/$HOME\//}
 git add "$last"
 status=$(git status -s)
