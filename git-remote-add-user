@@ -9,20 +9,20 @@ ghp=$(guld-dirname-escape)
 last=""
 glname=$(git config --file /home/$GULDNAME/.gitconfig host.gitlab)
 if [ -n "$glname" ]; then
-    $(git remote add $GULDNAME-gl git@gitlab.org:$glname/$ghp.git)
-    $(git remote set-url $GULDNAME-gl git@gitlab.org:$glname/$ghp.git)
+    $(git remote add "$GULDNAME-gl" git@gitlab.org:$glname/$ghp.git)
+    $(git remote set-url "$GULDNAME-gl" git@gitlab.org:$glname/$ghp.git)
     last=$GULDNAME-gl
 fi
 ghname=$(git config --file /home/$GULDNAME/.gitconfig host.github)
 if [ -n "$ghname" ]; then
-    $(git remote add $GULDNAME-gh git@github.com:$ghname/$ghp.git)
-    $(git remote set-url $GULDNAME-gh git@github.com:$ghname/$ghp.git)
+    $(git remote add "$GULDNAME-gh" git@github.com:$ghname/$ghp.git)
+    $(git remote set-url "$GULDNAME-gh" git@github.com:$ghname/$ghp.git)
     last=$GULDNAME-gh
 fi
 bbname=$(git config --file /home/$GULDNAME/.gitconfig host.bitbucket)
 if [ -n "$bbname" ]; then
-    $(git remote add $GULDNAME-bb git@bitbucket.org:$bbname/$ghp.git)
-    $(git remote set-url $GULDNAME-bb git@bitbucket.org:$bbname/$ghp.git)
+    $(git remote add "$GULDNAME-bb" git@bitbucket.org:$bbname/$ghp.git)
+    $(git remote set-url "$GULDNAME-bb" git@bitbucket.org:$bbname/$ghp.git)
     last=$GULDNAME-bb
 fi
 if [ ! -n "$last" ]; then
