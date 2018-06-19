@@ -34,7 +34,7 @@ if [ ! -n "$v" ]; then
 fi
 gltoken=$(pass $GULDNAME/git/gitlab-token | head -n 1)
 glpass=$(pass $GULDNAME/git/gitlab | head -n 1)
-glns=$(curl -s --header "Private-Token: $gltoken" "https://gitlab.com/api/v4/namespaces?search=$glowner" | python -c "import sys, json; print json.load(sys.stdin)[0]['id'] 2>/dev/null")
+glns=$(curl -s --header "Private-Token: $gltoken" "https://gitlab.com/api/v4/namespaces?search=$glowner" | python -c "import sys, json; print json.load(sys.stdin)[0]['id']" 2>/dev/null)
 if [ ! -n "$1" ] || [ ! -n "$user" ]; then
     echo "usage:"
     echo "    create-repo name username <--private>"
