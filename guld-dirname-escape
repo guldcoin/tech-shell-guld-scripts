@@ -8,20 +8,33 @@ p=$(pwd)
 if [ "$p" == "/home" ]; then
     echo .blocktree
     exit 0
-elif [ "$p" == "$GULDHOME" ]; then
-    echo $GULDNAME
-    exit 0
-else
-    pi=${p/\/home\/$USER/}
-    if [ "$p" != "$pi" ]; then
-        echo ${pi//\//-}
-        exit 0
-    fi
-    pi=${p/\/home\/$GULDHOME/}
-    if [ "$p" != "$pi" ]; then
-        echo ${pi//\//-}
-        exit 0
-    fi
 fi
-echo ${p:6}
-
+pp=${p/\/home\//}
+if [[ $pp != *"/"* ]]; then
+    echo perspective
+    exit 0
+fi
+OIFS=$IFS
+IFS='/'
+for d in $pp
+do
+    user=$d
+    break
+done
+IFS=$OIFS
+pi=${p/\/home\/$USER\//}
+if [ "$p" != "$pi" ]; then
+    echo ${pi//\//-}
+    exit 0
+fi
+pi=${p/\/home\/$GULDNAME\//}
+if [ "$p" != "$pi" ]; then
+    echo ${pi//\//-}
+    exit 0
+fi
+pi=${p/\/home\/$user\//}
+if [ "$p" != "$pi" ]; then
+    echo ${pi//\//-}
+    exit 0
+fi
+exit 1
