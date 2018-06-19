@@ -3,6 +3,7 @@ GULDNAME=$(guld-name)
 GULDHOME="/home/$GULDNAME"
 p=$(pwd)
 last=$p
+echo $p
 while [ $p != $GULDHOME ]; do
     last=$p
     git add -A && git commit -m "update" && git-push-user $GULDNAME && cd .. && p=$(pwd)
