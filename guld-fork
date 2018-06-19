@@ -26,4 +26,3 @@ fi
 guld-create-repo $ghp $user
 guld-remote-add-user-all
 guld-push-user $user 2>/dev/null
-
