@@ -55,30 +55,36 @@ ghname=$(git config --file $GULDHOME/.gitconfig host.github)
 if [ ! -n "$ghname" ]; then
     echo "What is your github username? (blank for none)"
     read ghname
-    git config --file $GULDHOME/.gitconfig host.github $ghname
-    echo "What is your github password? (to be encrypted)"
-    read -s ghpass
-    printf "$ghpass\nlogin: $ghname\nurl: github.com" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/github.gpg" -r $signingkey
+    if [ -n "$ghname" ]; then
+        git config --file $GULDHOME/.gitconfig host.github $ghname
+        echo "What is your github password? (to be encrypted)"
+        read -s ghpass
+        printf "$ghpass\nlogin: $ghname\nurl: github.com" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/github.gpg" -r $signingkey
+    fi
 fi
 
 bbname=$(git config --file $GULDHOME/.gitconfig host.bitbucket)
 if [ ! -n "$bbname" ]; then
     echo "What is your bitbucket username? (blank for none)"
     read bbname
-    git config --file $GULDHOME/.gitconfig host.bitbucket $bbname
-    echo "What is your bitbucket password? (to be encrypted)"
-    read -s bbpass
-    printf "$bbpass\nlogin: $bbname\nurl: bitbucket.org" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/bitbucket.gpg" -r $signingkey
+    if [ -n "$bbname" ]; then
+        git config --file $GULDHOME/.gitconfig host.bitbucket $bbname
+        echo "What is your bitbucket password? (to be encrypted)"
+        read -s bbpass
+        printf "$bbpass\nlogin: $bbname\nurl: bitbucket.org" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/bitbucket.gpg" -r $signingkey
+    fi
 fi
 
 glname=$(git config --file $GULDHOME/.gitconfig host.gitlab)
 if [ ! -n "$glname" ]; then
     echo "What is your gitlab username? (blank for none)"
     read glname
-    git config --file $GULDHOME/.gitconfig host.gitlab $glname
-    echo "What is your gitlab password? (to be encrypted)"
-    read -s glpass
-    printf "$glpass\nlogin: $glname\nurl: gitlab.org" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/gitlab.gpg" -r $signingkey
+    if [ -n "$glname" ]; then
+        git config --file $GULDHOME/.gitconfig host.gitlab $glname
+        echo "What is your gitlab password? (to be encrypted)"
+        read -s glpass
+        printf "$glpass\nlogin: $glname\nurl: gitlab.org" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/gitlab.gpg" -r $signingkey
+    fi
 fi
 
 guld=$(add-ssh-key  2>&1)
