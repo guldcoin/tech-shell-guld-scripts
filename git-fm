@@ -1,6 +1,10 @@
 #!/bin/bash
 #branches=$(git for-each-ref --format='%(refname)' refs/heads/ | grep -o [^/]*$)
-GULDNAME=$(guld-name)
+if [ -n "$1" ]; then
+    GULDNAME=$1
+else
+    GULDNAME=$(guld-name)
+fi
 git fetch $GULDNAME
 git merge $GULDNAME/$GULDNAME
 
