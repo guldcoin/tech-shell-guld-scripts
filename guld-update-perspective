@@ -13,11 +13,11 @@ git add .blocktree
 if [ -n "$1" ]; then
 	last=${1/$GULDHOME\//}
     git add "$last"
+    git commit -m "update"
+    git-push-user $GULDNAME
 fi
 status=$(git status -s)
 if [ ! -n "$status" ]; then
-    git commit -m "update"
-    git-push-user $GULDNAME
     cd ..
     git add $GULDNAME
     git commit -m "update"

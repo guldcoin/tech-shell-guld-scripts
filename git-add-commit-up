@@ -11,5 +11,4 @@ while [ $p != $GULDHOME ]; do
     cd ..
     p=$(pwd)
 done
-echo $last $GULDNAME
 guld-update-perspective $last $GULDNAME
