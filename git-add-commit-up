@@ -5,7 +5,11 @@ p=$(pwd)
 last=$p
 while [ $p != $GULDHOME ]; do
     last=$p
-    git add -A && git commit -m "update" && git-push-user $GULDNAME 2>/dev/null && cd .. && p=$(pwd)
+    git add -A && git commit -m "update"
+    if [ $? != 0 ]; then
+        exit 1
+    fi
+    git-push-user $GULDNAME 2>/dev/null && cd .. && p=$(pwd)
     if [ $? != 0 ]; then
         exit 1
     fi
