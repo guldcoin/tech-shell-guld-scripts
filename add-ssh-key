@@ -1,11 +1,11 @@
 #!/bin/bash
 GULDNAME=$(guld-name)
 bblogin=$(git config --file /home/$v/.gitconfig host.bitbucket)
-bbpass=$(pass $GULDNAME/git/bitbucket | head -n 1)
+bbpass=$(pass $GULDNAME/git/bitbucket | head -n 1 2> /dev/null)
 ghlogin=$(git config --file /home/$GULDNAME/.gitconfig host.github)
-ghpass=$(pass $GULDNAME/git/github | head -n 1)
+ghpass=$(pass $GULDNAME/git/github | head -n 1 2> /dev/null)
 gllogin=$(git config --file /home/$v/.gitconfig host.gitlab)
-gltoken=$(pass $GULDNAME/git/gitlab-token | head -n 1)
+gltoken=$(pass $GULDNAME/git/gitlab-token | head -n 1 2> /dev/null)
 
 if [ -n "$1" ]; then
     key=$1

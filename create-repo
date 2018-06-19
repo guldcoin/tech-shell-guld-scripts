@@ -20,20 +20,20 @@ bbowner=$(git config --file /home/$user/.gitconfig host.bitbucket)
 if [ ! -n "$bbowner" ]; then
     bbowner=$user
 fi
-bbpass=$(pass $GULDNAME/git/bitbucket | head -n 1)
+bbpass=$(pass $GULDNAME/git/bitbucket | head -n 1 2> /dev/null)
 ghlogin=$(git config --file /home/$GULDNAME/.gitconfig host.github)
 ghowner=$(git config --file /home/$user/.gitconfig host.github)
 if [ ! -n "$ghowner" ]; then
     ghowner=$user
 fi
-ghpass=$(pass $GULDNAME/git/github | head -n 1)
+ghpass=$(pass $GULDNAME/git/github | head -n 1 2> /dev/null)
 gllogin=$(git config --file /home/$GULDNAME/.gitconfig host.gitlab)
 glowner=$(git config --file /home/$user/.gitconfig host.gitlab)
 if [ ! -n "$v" ]; then
     glowner=$user
 fi
-gltoken=$(pass $GULDNAME/git/gitlab-token | head -n 1)
-glpass=$(pass $GULDNAME/git/gitlab | head -n 1)
+gltoken=$(pass $GULDNAME/git/gitlab-token | head -n 1 2> /dev/null)
+glpass=$(pass $GULDNAME/git/gitlab | head -n 1 2> /dev/null)
 glns=$(curl -s --header "Private-Token: $gltoken" "https://gitlab.com/api/v4/namespaces?search=$glowner" | python -c "import sys, json; print json.load(sys.stdin)[0]['id']" 2>/dev/null)
 if [ ! -n "$1" ] || [ ! -n "$user" ]; then
     echo "usage:"
