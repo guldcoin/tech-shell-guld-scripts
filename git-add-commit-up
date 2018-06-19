@@ -5,10 +5,10 @@ p=$(pwd)
 last=$p
 while [ $p != $GULDHOME ]; do
     last=$p
-    git add -A
-    git commit -m "update"
-    git-push-user $GULDNAME
-    cd ..
-    p=$(pwd)
+    git add -A && git commit -m "update" && git-push-user $GULDNAME && cd .. && p=$(pwd)
+    if [ $? != 0 ]; then
+        exit 1
+    fi
 done
 guld-update-perspective $last $GULDNAME
+exit $?
