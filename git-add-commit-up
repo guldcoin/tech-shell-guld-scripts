@@ -11,19 +11,4 @@ while [ $p != $GULDHOME ]; do
     cd ..
     p=$(pwd)
 done
-cd .blocktree
-git fetch $GULDNAME
-git merge $GULDNAME/$GULDNAME
-cd ..
-git add .blocktree
-last=${last/$GULDHOME\//}
-git add "$last"
-status=$(git status -s)
-if [ -n "$status" ]; then
-    git commit -m "update"
-    git-push-user $GULDNAME
-    cd ..
-    git add $GULDNAME
-    git commit -m "update"
-    git-push-user $GULDNAME
-fi
+guld-update-perspective
