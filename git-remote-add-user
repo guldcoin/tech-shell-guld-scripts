@@ -1,39 +1,34 @@
 #!/bin/bash
 if [ -n "$1" ]; then
-    username=$1
+    GULDNAME=$1
 else
-    user=$USER
+    GULDNAME=$(guld-name)
 fi
-p=$(pwd)
-if [ "$p" == "/home" ]; then
-    ghp=blocktree
-elif [ "$p" == "$HOME" ]; then
-    ghp=$username
-else
-    n=${#HOME}+1
-    p=${p:$n}
-    ghp=${p//\//-}
-fi
-username=$(git config --file /home/$username/.gitconfig user.username)
-glname=$(git config --file /home/$username/.gitconfig host.gitlab)
+GULDHOME="/home/$GULDNAME"
+ghp=$(guld-dirname-escape)
+last=""
+glname=$(git config --file /home/$GULDNAME/.gitconfig host.gitlab)
 if [ -n "$glname" ]; then
-    $(git remote add $username-gl git@gitlab.org:$glname/$ghp.git)
-    $(git remote set-url $username-gl git@gitlab.org:$glname/$ghp.git)
-    $(git remote add $username git@gitlab.org:$glname/$ghp.git)
-    $(git remote set-url $username git@gitlab.org:$glname/$ghp.git)
+    $(git remote add $GULDNAME-gl git@gitlab.org:$glname/$ghp.git)
+    $(git remote set-url $GULDNAME-gl git@gitlab.org:$glname/$ghp.git)
+    last=$GULDNAME-gl
 fi
-ghname=$(git config --file /home/$username/.gitconfig host.github)
+ghname=$(git config --file /home/$GULDNAME/.gitconfig host.github)
 if [ -n "$ghname" ]; then
-    $(git remote add $username-gh git@github.com:$ghname/$ghp.git)
-    $(git remote set-url $username-gh git@github.com:$ghname/$ghp.git)
-    $(git remote add $username git@github.com:$ghname/$ghp.git)
-    $(git remote set-url $username git@github.com:$ghname/$ghp.git)
+    $(git remote add $GULDNAME-gh git@github.com:$ghname/$ghp.git)
+    $(git remote set-url $GULDNAME-gh git@github.com:$ghname/$ghp.git)
+    last=$GULDNAME-gh
 fi
-bbname=$(git config --file /home/$username/.gitconfig host.bitbucket)
+bbname=$(git config --file /home/$GULDNAME/.gitconfig host.bitbucket)
 if [ -n "$bbname" ]; then
-    $(git remote add $username-bb git@bitbucket.org:$bbname/$ghp.git)
-    $(git remote set-url $username-bb git@bitbucket.org:$bbname/$ghp.git)
-    $(git remote add $username git@bitbucket.org:$bbname/$ghp.git)
-    $(git remote set-url $username git@bitbucket.org:$bbname/$ghp.git)
+    $(git remote add $GULDNAME-bb git@bitbucket.org:$bbname/$ghp.git)
+    $(git remote set-url $GULDNAME-bb git@bitbucket.org:$bbname/$ghp.git)
+    last=$GULDNAME-bb
 fi
-
+if [ ! -n "$last" ]; then
+    $(git remote add $GULDNAME git@bitbucket.org:$GULDNAME/$ghp.git)
+    $(git remote set-url $GULDNAME git@bitbucket.org:$GULDNAME/$ghp.git)
+else
+    $(git remote rename $last $GULDNAME)
+    $(git remote remove $last)
+fi

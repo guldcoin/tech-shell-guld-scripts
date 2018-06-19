@@ -1,0 +1,37 @@
+#!/bin/bash
+GULDNAME=$(guld-name)
+GULDHOME="/home/$GULDNAME"
+ghp=$(guld-dirname-escape)
+
+bblogin=$(git config --file /home/$GULDNAME/.gitconfig host.bitbucket)
+if [ ! -n "$bblogin" ]; then
+    echo "bitbucket not configured"
+fi
+
+bbpass=$(pass $GULDNAME/git/bitbucket | head -n 1)
+if [ ! -n "$bbpass" ]; then
+    echo "bitbucket not configured"
+else
+    git remote add guld "git@bitbucket.org:guld/$ghp.git"
+    git fetch guld
+    git merge guld/guld
+fi
+
+ghlogin=$(git config --file /home/$GULDNAME/.gitconfig host.github)
+if [ ! -n "$ghlogin" ]; then
+    echo "github not configured"
+fi
+
+ghpass=$(pass $GULDNAME/git/github | head -n 1)
+if [ ! -n "$ghpass" ]; then
+    echo "github not configured"
+else
+    git remote add guld-gh "git@github.com:guldcoin/$ghp.git"
+    git fetch guld-gh
+    git merge guld-gh/guld
+fi
+
+create-repo $ghp $GULDNAME
+git-remote-add-user
+git-push-user $GULDNAME
+

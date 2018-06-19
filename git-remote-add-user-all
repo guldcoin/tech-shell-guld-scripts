@@ -1,0 +1,5 @@
+#!/bin/bash
+ulist=$(ls /home)
+for u in $ulist; do
+    git-remote-add-user $u
+done

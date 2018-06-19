@@ -1,6 +1,6 @@
 #!/bin/bash
 #branches=$(git for-each-ref --format='%(refname)' refs/heads/ | grep -o [^/]*$)
-echo $USER
-git fetch $USER
-git merge $USER/$USER
+GULDNAME=$(guld-name)
+git fetch $GULDNAME
+git merge $GULDNAME/$GULDNAME
 

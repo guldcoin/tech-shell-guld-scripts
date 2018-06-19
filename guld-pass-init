@@ -1,0 +1,15 @@
+#!/bin/bash
+GULDNAME=$(guld-name)
+GULDHOME="/home/$GULDNAME"
+signingkey=$(git config --file $GULDHOME/.gitconfig user.signingkey)
+
+# initialize pass
+if [ ! -f $GULDHOME/.password-store/.gpg-id ] && [ -n "$signingkey" ]; then
+    pass init $signingkey
+fi
+
+if [ ! -f $GULDHOME/.password-store/$GULDNAME/.gpg-id ] && [ -n "$signingkey" ]; then
+    pass init $signingkey -p $GULDNAME
+fi
+mkdir -p "$GULDHOME/.password-store/$GULDNAME/git/"
+

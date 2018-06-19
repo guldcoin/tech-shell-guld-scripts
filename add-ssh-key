@@ -1,0 +1,20 @@
+#!/bin/bash
+bblogin=$(git config host.bitbucket)
+if [ ! -n "$bblogin" ]; then
+    echo "bitbucket not configured"
+    exit 1
+fi
+
+bbpass=$(pass $USER/git/bitbucket | head -n 1)
+if [ ! -n "$bbpass" ]; then
+    echo "bitbucket not configured"
+    exit 1
+fi
+
+if [ -n "$1" ]; then
+    key=$1
+else
+    key=`cat $HOME/.ssh/id_rsa.pub`
+fi
+curl --user $bblogin:$bbpass -X POST https://bitbucket.org/api/1.0/users/$bblogin/ssh-keys --data-urlencode "key=$key" --data-urlencode "label=guld-key"
+

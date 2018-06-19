@@ -1,27 +1,29 @@
 #!/bin/bash
+GULDNAME=$(guld-name)
+GULDHOME="/home/$GULDNAME"
 p=$(pwd)
 last=$p
-while [ $p != $HOME ]; do
+while [ $p != $GULDHOME ]; do
     last=$p
     git add -A
     git commit -m "update"
-    git push $USER $USER
+    git-push-user $GULDNAME
     cd ..
     p=$(pwd)
 done
 cd .blocktree
-git fetch $USER
-git merge $USER/$USER
+git fetch $GULDNAME
+git merge $GULDNAME/$GULDNAME
 cd ..
 git add .blocktree
-last=${last/$HOME\//}
+last=${last/$GULDHOME\//}
 git add "$last"
 status=$(git status -s)
 if [ -n "$status" ]; then
     git commit -m "update"
-    git push $USER $USER
+    git-push-user $GULDNAME
     cd ..
-    git add $USER
+    git add $GULDNAME
     git commit -m "update"
-    git push $USER $USER
+    git-push-user $GULDNAME
 fi

@@ -1,0 +1,19 @@
+#!/bin/bash
+GULDNAME=$(guld-name)
+GULDHOME="/home/$GULDNAME"
+
+if [ -n "$1" ]; then
+    p=$1
+else
+    p=$(pwd)
+fi
+if [ "$p" == "/home" ]; then
+    echo .blocktree
+elif [ "$p" == "$HOME" ]; then
+    echo $GULDNAME
+else
+    n=${#GULDHOME}+1
+    p=${p:$n}
+    ghp=${p//\//-}
+    echo $ghp
+fi

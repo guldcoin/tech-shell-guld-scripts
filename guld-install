@@ -1,5 +1,5 @@
 #!/bin/bash
-preqs="gnupg2 git pass qtpass ledger python-pip"
+preqs="gnupg2 git pass qtpass ledger python-pip curl"
 
 # detect OS
 if [ -f /etc/os-release ]; then
@@ -8,314 +8,61 @@ if [ -f /etc/os-release ]; then
     if [ "$NAME" != "Ubuntu" ]; then
         echo "Only Ubuntu install currently automated. Assuming you have pre-reqs: $preqs"
     else
-        sudo apt-get install $preqs
-        sudo pip install bitbucket-cli
+        for req in $preqs; do
+            if [ "$req" == "gnupg2" ]; then
+                req=gpg2
+            fi
+            if [ "$req" == "python-pip" ]; then
+                req=pip
+            fi
+            w=$(which $req)
+            if [ ! -n "$w" ]; then
+                sudo apt-get install $req
+            fi
+        done
+        w=$(which bb)
+        if [ ! -n "$w" ]; then
+            sudo pip install bitbucket-cli
+        fi
     fi
 fi
 
-# generate ssh key if not done already
-if [ ! -f $HOME/.ssh/id_rsa ]; then
-    echo "please generate an ssh key"
-    ssh-keygen
-fi
+guld-pass-init
+guld-config
 
-# generate pgp key if not done already
-# get list twice in case first time is init
-keylist=$(gpg2 --list-secret-keys)
-keylist=$(gpg2 --list-secret-keys)
-if [ ! -n keylist ]; then
-    echo "please generate a PGP key"
-    gpg2 --full-generate-key
-fi
-
-# load or prompt for git config
-username=$(git config user.username)
-if [ ! -n "$username" ]; then
-    echo "What is your personal guld name?"
-    read username
-    git config --global user.username $username
-fi
-name=$(git config user.name)
-if [ ! -n "$name" ]; then
-    echo "What is your public full name? (optional)"
-    read name
-    git config --global user.name $name
-fi
-email=$(git config user.email)
-if [ ! -n "$email" ]; then
-    echo "What is your public email address? (optional)"
-    read email
-    git config --global user.email $email
-fi
-signingkey=$(git config user.signingkey)
-if [ ! -n "$signingkey" ]; then
-    echo "Which of these is your PGP key id? (blank for group)"
-    echo "$keylist"
-    read signingkey
-    git config --global user.signingkey $signingkey
-fi
-commitsign=$(git config commit.sign)
-if [ ! -n "$commitsign" ]; then
-    git config --global commit.gpgsign true
-fi
-
-# initialize pass
-if [ ! -f $HOME/.password-store/.gpg-id ]; then
-    pass init $signingkey
-fi
-
-if [ ! -f $HOME/.password-store/$USER/.gpg-id ]; then
-    pass init $signingkey -p $USER
-fi
-
-# initialize git host(s)
-ghname=$(git config host.github)
-bbname=$(git config host.bitbucket)
-glname=$(git config host.gitlab)
-mkdir -p "$HOME/.password-store/$USER/git/"
-if [ ! -n "$ghname" ] && [ ! -n "$bbname" ] && [ ! -n "$glname" ]; then
-    echo "What is your github username? (blank for none)"
-    read ghname
-    if [ -n $ghname ]; then
-        git config --global host.github $ghname
-        echo "What is your github password? (to be encrypted)"
-        read -s ghpass
-        printf "$ghpass\nlogin: $ghname\nurl: github.com" | gpg2 --encrypt -o "$HOME/.password-store/$USER/git/github.gpg" -r $signingkey
+fork () {
+    if [ ! -d "$1/.git" ]; then
+        mkdir -p $1
+        cd $1
+        git init
+        guld-fork
     fi
-    echo "What is your bitbucket username? (blank for none)"
-    read bbname
-    if [ -n "$bbname" ]; then
-        git config --global host.bitbucket $bbname
-        echo "What is your bitbucket password? (to be encrypted)"
-        read -s bbpass
-        printf "$bbpass\nlogin: $bbname\nurl: bitbucket.org" | gpg2 --encrypt -o "$HOME/.password-store/$USER/git/bitbucket.gpg" -r $signingkey
-    fi
-    echo "What is your gitlab username? (blank for none)"
-    read glname
-    if [ -n $glname ]; then
-        git config --global host.gitlab $glname
-        echo "What is your gitlab password? (to be encrypted)"
-        read -s glpass
-        printf "$glpass\nlogin: $glname\nurl: gitlab.org" | gpg2 --encrypt -o "$HOME/.password-store/$USER/git/gitlab.gpg" -r $signingkey
-    fi
-fi
-ghname=$(git config host.github)
-bbname=$(git config host.bitbucket)
-glname=$(git config host.gitlab)
-ghpass=$(pass $USER/git/github | head -n 1)
-bbpass=$(pass $USER/git/bitbucket | head -n 1)
-glpass=$(pass $USER/git/gitlab | head -n 1)
+}
 
-if [ ! -d "$HOME/tech/shell/guld-scripts" ]; then
-    mkdir -p "$HOME/tech/shell/guld-scripts"
-    cd "$HOME/tech/shell/guld-scripts"
-    git remote add guld git@bitbucket.org:guld/tech-shell-guld-scripts.git
-    git remote add guld-bb git@bitbucket.org:guld/tech-shell-guld-scripts.git
-    git pull guld master
-    git remote add guld-gh git@github.com:guldcoin/tech-shell-guld-scripts.git
-    git pull guld-gh master
-    export PATH="$PATH:$HOME/tech/shell/guld-scripts"
-    echo "export PATH=\"$PATH:$HOME/tech/shell/guld-scripts\"" >> $HOME/.bashrc
-    cd $HOME
-fi
+mkdir -p $HOME/Downloads
+fork "$HOME/Downloads/guld-scripts"
+export PATH="$PATH:$HOME/Downloads/guld-scripts"
+echo "export PATH=\"$PATH:$HOME/tech/shell/guld-scripts\"" >> $HOME/.bashrc
 
-# initialize local blocktree if not done already
-if [ ! -d /home/.git ]; then
-    cd /home
-    sudo chown $USER:$USER .
-    git init
-    git remote add guld git@bitbucket.org:guld/blocktree.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    if [ -n "$bbname" ]; then
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi
+cd /home
+sudo chown $USER:$USER .
+fork "/home"
+fork $HOME
+fork "$HOME/Documents"
+fork "$HOME/dotfiles"
+fork "$HOME/.password-store"
+fork "$HOME/Pictures"
+fork "$HOME/devices"
+fork "$HOME/io"
+fork "$HOME/keys"
+cd "$HOME/keys"
+git submodule update --init pgp
+git submodule update --init ssh
+fork "$HOME/ledger"
+fork "$HOME/tech"
+cd "$HOME/tech"
+git submodule update --init shell
+cd shell
+git submodule update --init guld-scripts
+fork "$HOME/.blocktree"
 
-# initialize local user if not done already
-if [ ! -d $HOME/.git ]; then
-    cd $HOME
-    git init
-    git remote add guld git@bitbucket.org:guld/guld.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    echo $bbname
-    if [ -n "$bbname" ]; then
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi
-
-# initialize local Documents if not done already
-if [ ! -d $HOME/Documents/.git ]; then
-    cd $HOME/Documents
-    git init
-    git remote add guld git@bitbucket.org:guld/Documents.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    if [ -n "$bbname" ]; then
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi
-
-# initialize local dotfiles if not done already
-if [ ! -d $HOME/dotfiles/.git ]; then
-    cd $HOME/dotfiles
-    git init
-    git remote add guld git@bitbucket.org:guld/dotfiles.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    if [ -n "$bbname" ]; then
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi
-
-# initialize local .password-store if not done already
-if [ ! -d $HOME/.password-store/.git ]; then
-    cd $HOME/.password-store
-    git init
-    git remote add guld git@bitbucket.org:guld/.password-store.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    if [ -n "$bbname" ]; then
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi
-
-# initialize local Pictures if not done already
-if [ ! -d $HOME/Pictures/.git ]; then
-    cd $HOME/Pictures
-    git init
-    git remote add guld git@bitbucket.org:guld/Pictures.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    if [ -n "$bbname" ]; then
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi
-
-# initialize local devices if not done already
-if [ ! -d $HOME/devices/.git ]; then
-    mkdir -p $HOME/devices
-    cd $HOME/devices
-    git init
-    git remote add guld git@bitbucket.org:guld/devices.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    if [ -n "$bbname" ]; then
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi
-
-# initialize local io if not done already
-if [ ! -d $HOME/io/.git ]; then
-    mkdir -p $HOME/io
-    cd $HOME/io
-    git init
-    git remote add guld git@bitbucket.org:guld/io.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    if [ -n "$bbname" ]; then
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi
-
-# initialize local keys if not done already
-if [ ! -d $HOME/keys/.git ]; then
-    mkdir -p $HOME/keys
-    cd $HOME/keys
-    git init
-    git remote add guld git@bitbucket.org:guld/keys.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    if [ -n "$bbname" ]; then
-    echo "bb create_from_local -w $bbname -o"
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi
-
-# initialize local ledger if not done already
-if [ ! -d $HOME/ledger/.git ]; then
-    mkdir -p $HOME/ledger
-    cd $HOME/ledger
-    git init
-    git remote add guld git@bitbucket.org:guld/ledger.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    if [ -n "$bbname" ]; then
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi
-
-# initialize local tech if not done already
-if [ ! -d $HOME/tech/.git ]; then
-    mkdir -p $HOME/tech
-    cd $HOME/tech
-    git init
-    git remote add guld git@bitbucket.org:guld/tech.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    if [ -n "$bbname" ]; then
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi
-
-# initialize local blocktree if not done already
-if [ ! -d $HOME/blocktree/.git ]; then
-    mkdir -p $HOME/blocktree
-    cd $HOME/blocktree
-    git init
-    git remote add guld git@bitbucket.org:guld/blocktree.git
-    git-remote-add-user
-    git fetch guld
-    git checkout guld
-    git checkout -b $USER
-    git checkout $USER
-    if [ -n "$bbname" ]; then
-        bb create_from_local -w $bbname -o --username $bbname --password $bbpass --scm git --protocol ssh
-    fi
-    git push $USER $USER
-fi

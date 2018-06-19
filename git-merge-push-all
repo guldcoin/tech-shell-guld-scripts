@@ -1,10 +1,10 @@
 #!/bin/bash
+GULDNAME=$(guld-name)
 branches=$(git for-each-ref --format='%(refname)' refs/heads/ | grep -o [^/]*$)
-git pushall $USER
+git-push-user $GULDNAME
 for branch in $branches; do
     git checkout $branch
-    git merge $USER
-    git push $branch $branch
-    git push guld $branch
+    git merge $GULDNAME
+    git-push-user $branch
 done
-git checkout $USER
+git checkout $GULDNAME

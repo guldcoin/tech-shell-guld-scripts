@@ -1,0 +1,50 @@
+#!/bin/bash
+GULDNAME=$(guld-name)
+GULDHOME="/home/$GULDNAME"
+flag="-o"
+user=$2
+if [ "$1" == "--private" ]; then
+    flag="-c"
+    shift
+fi
+if [ "$3" == "--private" ]; then
+    flag="-c"
+elif [ "$2" == "--private" ]; then
+    flag="-c"
+    user=$GULDNAME
+elif [ ! -n "$2" ]; then
+    user=$GULDNAME
+fi
+bblogin=$(git config --file /home/$GULDNAME/.gitconfig host.bitbucket)
+bbowner=$(git config --file /home/$user/.gitconfig host.bitbucket)
+if [ ! -n "$bbowner" ]; then
+    bbowner=$user
+fi
+bbpass=$(pass $GULDNAME/git/bitbucket | head -n 1)
+ghlogin=$(git config --file /home/$GULDNAME/.gitconfig host.github)
+ghowner=$(git config --file /home/$user/.gitconfig host.github)
+if [ ! -n "$ghowner" ]; then
+    ghowner=$user
+fi
+ghpass=$(pass $GULDNAME/git/github | head -n 1)
+
+if [ ! -n "$1" ] || [ ! -n "$user" ]; then
+    echo "usage:"
+    echo "    create-repo name username <--private>"
+    echo "        Creates repo with name under account username."
+    echo "        Default is to create public repo unless --private specified"
+elif [ "$user" != "$USER" ] && [ "$ghowner" != "$ghlogin" ]; then
+    if [ -n "$ghlogin" ] && [ -n "$ghpass" ]; then
+        curl -u $ghlogin:$ghpass https://api.github.com/orgs/$ghowner/repos -d "{ \"name\": \"$1\" }"
+    fi
+    if [ -n "$bblogin" ] && [ -n "$bbpass" ]; then
+        bb create -w $bbowner $flag -u $bblogin -p $bbpass $1
+    fi
+else
+    if [ -n "$ghlogin" ] && [ -n "$ghpass" ]; then
+        curl -u $ghlogin:$ghpass https://api.github.com/user/repos -d "{ \"name\": \"$1\" }"
+    fi
+    if [ -n "$bblogin" ] && [ -n "$bbpass" ]; then
+        bb create -w $bbowner $flag -u $bblogin -p $bbpass $1
+    fi
+fi
