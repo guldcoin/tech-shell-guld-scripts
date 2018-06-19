@@ -25,5 +25,5 @@ if [ -n "$ghpass" ]; then
 fi
 create-repo $ghp $user
 git-remote-add-user-all
-git-push-user $user
+git-push-user $user 2>/dev/null
 

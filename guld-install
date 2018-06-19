@@ -37,7 +37,6 @@ fork () {
         git init
     fi
     guld-fork
-    git-remote-add-user-all
 }
 
 mkdir -p $HOME/Downloads
@@ -46,7 +45,10 @@ export PATH="$PATH:$HOME/Downloads/guld-scripts"
 echo "export PATH=\"$PATH:$HOME/tech/shell/guld-scripts\"" >> $HOME/.bashrc
 
 cd /home
-sudo chown $USER:$USER .
+howner=$(stat -c '%U' /home)
+if [ "$howner" == "root" ]; then
+    sudo chown $USER:$USER .
+fi
 fork "/home"
 fork $HOME
 fork "$HOME/Documents"

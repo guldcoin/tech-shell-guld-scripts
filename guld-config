@@ -1,9 +1,8 @@
 #!/bin/bash
 GULDNAME=$(guld-name)
 GULDHOME="/home/$GULDNAME"
-
 # generate ssh key if not done already
-if [ ! -f $GULDHOME/.ssh/id_rsa ]; then
+if [ ! -f $GULDHOME/.ssh/id_rsa.pub ]; then
     echo "please generate an ssh key"
     ssh-keygen
 fi
