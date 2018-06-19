@@ -2,7 +2,10 @@
 GULDNAME=$(guld-name)
 GULDHOME="/home/$GULDNAME"
 ghp=$(guld-dirname-escape)
-
+user=$1
+if [ ! -n "$1" ]; then
+    user=$GULDNAME
+fi
 bblogin=$(git config --file /home/$GULDNAME/.gitconfig host.bitbucket)
 if [ ! -n "$bblogin" ]; then
     echo "bitbucket not configured"
@@ -31,7 +34,7 @@ else
     git merge guld-gh/guld
 fi
 
-create-repo $ghp $GULDNAME
+create-repo $ghp $user
 git-remote-add-user
-git-push-user $GULDNAME
+git-push-user $user
 
