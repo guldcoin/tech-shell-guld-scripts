@@ -1,0 +1,98 @@
+#!/bin/bash
+GULDNAME=$(guld-name)
+GULDHOME="/home/$GULDNAME"
+# generate ssh key if not done already
+if [ ! -f $GULDHOME/.ssh/id_rsa.pub ]; then
+    echo "please generate an ssh key"
+    ssh-keygen
+fi
+
+# generate pgp key if not done already
+# get list twice in case first time is init
+keylist=$(gpg2 --list-secret-keys)
+keylist=$(gpg2 --list-secret-keys)
+if [ ! -n keylist ]; then
+    echo "please generate a PGP key"
+    gpg2 --full-generate-key
+fi
+
+# load or prompt for git config
+username=$(git config --file $GULDHOME/.gitconfig user.username)
+if [ ! -n "$username" ]; then
+    echo "What is your personal guld name?"
+    read username
+    git config --file $GULDHOME/.gitconfig user.username $username
+fi
+name=$(git config --file $GULDHOME/.gitconfig user.name)
+if [ ! -n "$name" ]; then
+    echo "What is your public full name? (optional)"
+    read name
+    git config --file $GULDHOME/.gitconfig user.name $name
+fi
+email=$(git config --file $GULDHOME/.gitconfig user.email)
+if [ ! -n "$email" ]; then
+    echo "What is your public email address? (optional)"
+    read email
+    git config --file $GULDHOME/.gitconfig user.email $email
+fi
+signingkey=$(git config --file $GULDHOME/.gitconfig user.signingkey)
+if [ ! -n "$signingkey" ]; then
+    echo "Which of these is your PGP key id? (blank for group)"
+    echo "$keylist"
+    read signingkey
+    git config --file $GULDHOME/.gitconfig user.signingkey $signingkey
+fi
+commitsign=$(git config --file $GULDHOME/.gitconfig commit.sign)
+if [ ! -n "$commitsign" ]; then
+    git config --file $GULDHOME/.gitconfig commit.gpgsign true
+fi
+
+guld-pass-init
+
+# initialize git host(s)
+ghname=$(git config --file $GULDHOME/.gitconfig host.github)
+if [ ! -n "$ghname" ]; then
+    echo "What is your github username? (blank for none)"
+    read ghname
+    if [ -n "$ghname" ]; then
+        git config --file $GULDHOME/.gitconfig host.github $ghname
+        echo "What is your github password? (to be encrypted)"
+        read -s ghpass
+        printf "$ghpass\nlogin: $ghname\nurl: github.com" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/github.gpg" -r $signingkey
+    fi
+fi
+
+bbname=$(git config --file $GULDHOME/.gitconfig host.bitbucket)
+if [ ! -n "$bbname" ]; then
+    echo "What is your bitbucket username? (blank for none)"
+    read bbname
+    if [ -n "$bbname" ]; then
+        git config --file $GULDHOME/.gitconfig host.bitbucket $bbname
+        echo "What is your bitbucket password? (to be encrypted)"
+        read -s bbpass
+        printf "$bbpass\nlogin: $bbname\nurl: bitbucket.org" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/bitbucket.gpg" -r $signingkey
+    fi
+fi
+
+glname=$(git config --file $GULDHOME/.gitconfig host.gitlab)
+if [ ! -n "$glname" ]; then
+    echo "What is your gitlab username? (blank for none)"
+    read glname
+    if [ -n "$glname" ]; then
+        git config --file $GULDHOME/.gitconfig host.gitlab $glname
+        echo "What is your gitlab password? (to be encrypted)"
+        read -s glpass
+        printf "$glpass\nlogin: $glname\nurl: gitlab.com" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/gitlab.gpg" -r $signingkey
+        echo "What is your gitlab personal access token? (to be encrypted)"
+        read -s glpass
+        printf "$glpass\nlogin: $glname\nurl: gitlab.com" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/gitlab-token.gpg" -r $signingkey
+    fi
+fi
+
+guld=$(guld-add-ssh-key  2>&1)
+
+if [ ! -n "$ghname" ] && [ ! -n "$bbname" ] && [ ! -n "$glname" ]; then
+    echo "ERROR: at least one git host must be configured"
+    exit 1
+fi
+

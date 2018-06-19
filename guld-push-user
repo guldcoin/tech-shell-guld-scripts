@@ -1,0 +1,13 @@
+#!/bin/bash
+GULDNAME=$(guld-name)
+remotes=$(git remote)
+branch=$GULDNAME
+if [ -n "$1" ]; then
+    branch=$1
+fi
+for r in $remotes; do
+	if [[ $r = "$branch"* ]]; then
+	  w=$(git push -q $r $branch)
+	fi
+done
+

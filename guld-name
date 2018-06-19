@@ -1,0 +1,12 @@
+#!/bin/bash
+if [ -n "$GULDNAME" ]; then
+    echo $GULDNAME
+else
+    username=$(git config --file /home/$USER/.gitconfig user.username)
+    if [ ! -n "$username" ]; then
+        echo $USER
+    else
+        echo $username
+    fi
+fi
+

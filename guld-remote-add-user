@@ -1,0 +1,34 @@
+#!/bin/bash
+if [ -n "$1" ]; then
+    GULDNAME=$1
+else
+    GULDNAME=$(guld-name)
+fi
+GULDHOME="/home/$GULDNAME"
+ghp=$(guld-dirname-escape)
+last=""
+glname=$(git config --file /home/$GULDNAME/.gitconfig host.gitlab)
+if [ -n "$glname" ]; then
+    w=$(git remote add "$GULDNAME-gl" git@gitlab.com:$glname/$ghp.git 2>&1)
+    w=$(git remote set-url "$GULDNAME-gl" git@gitlab.com:$glname/$ghp.git 2>&1)
+    last=$GULDNAME-gl
+fi
+ghname=$(git config --file /home/$GULDNAME/.gitconfig host.github)
+if [ -n "$ghname" ]; then
+    w=$(git remote add "$GULDNAME-gh" git@github.com:$ghname/$ghp.git 2>&1)
+    w=$(git remote set-url "$GULDNAME-gh" git@github.com:$ghname/$ghp.git 2>&1)
+    last=$GULDNAME-gh
+fi
+bbname=$(git config --file /home/$GULDNAME/.gitconfig host.bitbucket)
+if [ -n "$bbname" ]; then
+    w=$(git remote add "$GULDNAME-bb" git@bitbucket.org:$bbname/$ghp.git 2>&1)
+    w=$(git remote set-url "$GULDNAME-bb" git@bitbucket.org:$bbname/$ghp.git 2>&1)
+    last=$GULDNAME-bb
+fi
+if [ ! -n "$last" ]; then
+    w=$(git remote add $GULDNAME git@bitbucket.org:$GULDNAME/$ghp.git 2>&1)
+    w=$(git remote set-url $GULDNAME git@bitbucket.org:$GULDNAME/$ghp.git 2>&1)
+else
+    w=$(git remote rename $last $GULDNAME 2>&1)
+    w=$(git remote remove $last 2>&1)
+fi

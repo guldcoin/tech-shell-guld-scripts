@@ -1,0 +1,25 @@
+#!/bin/bash
+GULDNAME=$(guld-name)
+if [ -n "$2" ]; then
+    GULDNAME=$2
+fi
+GULDHOME="/home/$GULDNAME"
+
+cd $HOME/.blocktree
+git fetch $GULDNAME
+git merge $GULDNAME/$GULDNAME
+cd ..
+git add .blocktree
+if [ -n "$1" ]; then
+	last=${1/$GULDHOME\//}
+    git add "$last"
+    git commit -m "update"
+    guld-push-user $GULDNAME
+fi
+status=$(git status -s)
+if [ ! -n "$status" ]; then
+    cd ..
+    git add $GULDNAME
+    git commit -m "update"
+    guld-push-user $GULDNAME 2>/dev/null
+fi

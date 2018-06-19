@@ -1,0 +1,71 @@
+#!/bin/bash
+preqs="gnupg2 git pass qtpass ledger python-pip curl"
+
+# detect OS
+if [ -f /etc/os-release ]; then
+    # freedesktop.org and systemd
+    . /etc/os-release
+    if [ "$NAME" != "Ubuntu" ]; then
+        echo "Only Ubuntu install currently automated. Assuming you have pre-reqs: $preqs"
+    else
+        for req in $preqs; do
+            if [ "$req" == "gnupg2" ]; then
+                req=gpg2
+            fi
+            if [ "$req" == "python-pip" ]; then
+                req=pip
+            fi
+            w=$(which $req)
+            if [ ! -n "$w" ]; then
+                sudo apt-get install $req
+            fi
+        done
+        w=$(which bb)
+        if [ ! -n "$w" ]; then
+            sudo pip install bitbucket-cli
+        fi
+    fi
+fi
+
+guld-pass-init
+guld-config
+
+fork () {
+    if [ ! -d "$1/.git" ]; then
+        mkdir -p $1
+        cd $1
+        git init
+    fi
+    guld-fork
+}
+
+mkdir -p $HOME/Downloads
+fork "$HOME/Downloads/guld-scripts"
+export PATH="$PATH:$HOME/Downloads/guld-scripts"
+echo "export PATH=\"$PATH:$HOME/tech/shell/guld-scripts\"" >> $HOME/.bashrc
+
+cd /home
+howner=$(stat -c '%U' /home)
+if [ "$howner" == "root" ]; then
+    sudo chown $USER:$USER .
+fi
+fork "/home"
+fork $HOME
+fork "$HOME/Documents"
+fork "$HOME/dotfiles"
+fork "$HOME/.password-store"
+fork "$HOME/Pictures"
+fork "$HOME/devices"
+fork "$HOME/io"
+fork "$HOME/keys"
+cd "$HOME/keys"
+git submodule update --init pgp
+git submodule update --init ssh
+fork "$HOME/ledger"
+fork "$HOME/tech"
+cd "$HOME/tech"
+git submodule update --init shell
+cd shell
+git submodule update --init guld-scripts
+fork "$HOME/.blocktree"
+

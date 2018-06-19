@@ -1,0 +1,29 @@
+#!/bin/bash
+GULDNAME=$(guld-name)
+GULDHOME="/home/$GULDNAME"
+ghp=$(guld-dirname-escape)
+user=$1
+if [ ! -n "$1" ]; then
+    user=$GULDNAME
+fi
+bblogin=$(git config --file /home/$GULDNAME/.gitconfig host.bitbucket)
+bbpass=$(pass $GULDNAME/git/bitbucket | head -n 1 2> /dev/null)
+if [ -n "$bbpass" ]; then
+    w=$(git remote add guld "git@bitbucket.org:guld/$ghp.git" 2>&1 && git fetch guld && git merge guld/guld)
+fi
+
+ghlogin=$(git config --file /home/$GULDNAME/.gitconfig host.github)
+ghpass=$(pass $GULDNAME/git/github | head -n 1 2> /dev/null)
+if [ -n "$ghpass" ]; then
+    w=$(git remote add guld-gh "git@github.com:guldcoin/$ghp.git" 2>&1 && git fetch guld-gh && git merge guld-gh/guld)
+fi
+
+gllogin=$(git config --file /home/$GULDNAME/.gitconfig host.gitlab)
+gltoken=$(pass $GULDNAME/git/gitlab-token | head -n 1 2> /dev/null)
+if [ -n "$ghpass" ]; then
+    w=$(git remote add guld-gl "git@gitlab.com:guld/$ghp.git" 2>&1 && git fetch guld-gl && git merge guld-gl/guld)
+fi
+guld-create-repo $ghp $user
+guld-remote-add-user-all
+guld-push-user $user 2>/dev/null
+
