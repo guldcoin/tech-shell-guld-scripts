@@ -1,0 +1,9 @@
+#!/bin/bash
+chance=50
+if [ -n "$2" ]; then
+    chance=$2
+fi
+if [ "$(($RANDOM % 100))" -lt "$chance" ]; then
+    eval $1
+fi
+

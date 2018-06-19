@@ -83,7 +83,10 @@ if [ ! -n "$glname" ]; then
         git config --file $GULDHOME/.gitconfig host.gitlab $glname
         echo "What is your gitlab password? (to be encrypted)"
         read -s glpass
-        printf "$glpass\nlogin: $glname\nurl: gitlab.org" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/gitlab.gpg" -r $signingkey
+        printf "$glpass\nlogin: $glname\nurl: gitlab.com" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/gitlab.gpg" -r $signingkey
+        echo "What is your gitlab personal access token? (to be encrypted)"
+        read -s glpass
+        printf "$glpass\nlogin: $glname\nurl: gitlab.com" | gpg2 --encrypt -o "$GULDHOME/.password-store/$GULDNAME/git/gitlab-token.gpg" -r $signingkey
     fi
 fi
 

@@ -1,20 +1,24 @@
 #!/bin/bash
-bblogin=$(git config host.bitbucket)
-if [ ! -n "$bblogin" ]; then
-    echo "bitbucket not configured"
-    exit 1
-fi
-
-bbpass=$(pass $USER/git/bitbucket | head -n 1)
-if [ ! -n "$bbpass" ]; then
-    echo "bitbucket not configured"
-    exit 1
-fi
+GULDNAME=$(guld-name)
+bblogin=$(git config --file /home/$v/.gitconfig host.bitbucket)
+bbpass=$(pass $GULDNAME/git/bitbucket | head -n 1)
+ghlogin=$(git config --file /home/$GULDNAME/.gitconfig host.github)
+ghpass=$(pass $GULDNAME/git/github | head -n 1)
+gllogin=$(git config --file /home/$v/.gitconfig host.gitlab)
+gltoken=$(pass $GULDNAME/git/gitlab-token | head -n 1)
 
 if [ -n "$1" ]; then
     key=$1
 else
     key=`cat $HOME/.ssh/id_rsa.pub`
 fi
-curl --user $bblogin:$bbpass -X POST https://bitbucket.org/api/1.0/users/$bblogin/ssh-keys --data-urlencode "key=$key" --data-urlencode "label=guld-key"
+if [ -n "$bbpass" ]; then
+    w=$(curl -s --user $bblogin:$bbpass -X POST https://bitbucket.org/api/1.0/users/$bblogin/ssh-keys --data-urlencode "key=$key" --data-urlencode "label=guld-key")
+fi
+if [ -n "$ghpass" ]; then
+    w=$(curl -s --user $ghlogin:$ghpass -X POST https://api.github.com/user/keys -d "{ \"key\": \"$key\", \"title\": \"guld-key\" }" )
+fi
+if [ -n "$gltoken" ]; then
+    w=$(curl -s --header "Private-Token: $gltoken" -X POST https://gitlab.com/api/v4/user/keys --data-urlencode "key=$key" --data-urlencode "title=guld-key")
+fi
 

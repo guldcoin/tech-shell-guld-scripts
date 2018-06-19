@@ -7,7 +7,7 @@ if [ -n "$1" ]; then
 fi
 for r in $remotes; do
 	if [[ $r = "$branch"* ]]; then
-	  git push $r $branch
+	  w=$(git push -q $r $branch)
 	fi
 done
 

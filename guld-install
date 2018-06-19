@@ -35,8 +35,9 @@ fork () {
         mkdir -p $1
         cd $1
         git init
-        guld-fork
     fi
+    guld-fork
+    git-remote-add-user-all
 }
 
 mkdir -p $HOME/Downloads

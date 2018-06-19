@@ -7,34 +7,23 @@ if [ ! -n "$1" ]; then
     user=$GULDNAME
 fi
 bblogin=$(git config --file /home/$GULDNAME/.gitconfig host.bitbucket)
-if [ ! -n "$bblogin" ]; then
-    echo "bitbucket not configured"
-fi
-
 bbpass=$(pass $GULDNAME/git/bitbucket | head -n 1)
-if [ ! -n "$bbpass" ]; then
-    echo "bitbucket not configured"
-else
-    git remote add guld "git@bitbucket.org:guld/$ghp.git"
-    git fetch guld
-    git merge guld/guld
+if [ -n "$bbpass" ]; then
+    w=$(git remote add guld "git@bitbucket.org:guld/$ghp.git" 2>&1 && git fetch guld && git merge guld/guld)
 fi
 
 ghlogin=$(git config --file /home/$GULDNAME/.gitconfig host.github)
-if [ ! -n "$ghlogin" ]; then
-    echo "github not configured"
-fi
-
 ghpass=$(pass $GULDNAME/git/github | head -n 1)
-if [ ! -n "$ghpass" ]; then
-    echo "github not configured"
-else
-    git remote add guld-gh "git@github.com:guldcoin/$ghp.git"
-    git fetch guld-gh
-    git merge guld-gh/guld
+if [ -n "$ghpass" ]; then
+    w=$(git remote add guld-gh "git@github.com:guldcoin/$ghp.git" 2>&1 && git fetch guld-gh && git merge guld-gh/guld)
 fi
 
+gllogin=$(git config --file /home/$GULDNAME/.gitconfig host.gitlab)
+gltoken=$(pass $GULDNAME/git/gitlab-token | head -n 1)
+if [ -n "$ghpass" ]; then
+    w=$(git remote add guld-gl "git@gitlab.com:guld/$ghp.git" 2>&1 && git fetch guld-gl && git merge guld-gl/guld)
+fi
 create-repo $ghp $user
-git-remote-add-user
+git-remote-add-user-all
 git-push-user $user
 

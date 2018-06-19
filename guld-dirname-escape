@@ -6,7 +6,7 @@ else
 fi
 p=$(pwd)
 if [ "$p" == "/home" ]; then
-    echo .blocktree
+    echo _blocktree
     exit 0
 fi
 pp=${p/\/home\//}
@@ -22,6 +22,7 @@ do
     break
 done
 IFS=$OIFS
+p=${p/./_}
 pi=${p/\/home\/$USER\//}
 if [ "$p" != "$pi" ]; then
     echo ${pi//\//-}

@@ -27,7 +27,14 @@ if [ ! -n "$ghowner" ]; then
     ghowner=$user
 fi
 ghpass=$(pass $GULDNAME/git/github | head -n 1)
-
+gllogin=$(git config --file /home/$GULDNAME/.gitconfig host.gitlab)
+glowner=$(git config --file /home/$user/.gitconfig host.gitlab)
+if [ ! -n "$v" ]; then
+    glowner=$user
+fi
+gltoken=$(pass $GULDNAME/git/gitlab-token | head -n 1)
+glpass=$(pass $GULDNAME/git/gitlab | head -n 1)
+glns=$(curl -s --header "Private-Token: $gltoken" "https://gitlab.com/api/v4/namespaces?search=$glowner" | python -c "import sys, json; print json.load(sys.stdin)[0]['id']")
 if [ ! -n "$1" ] || [ ! -n "$user" ]; then
     echo "usage:"
     echo "    create-repo name username <--private>"
@@ -35,16 +42,22 @@ if [ ! -n "$1" ] || [ ! -n "$user" ]; then
     echo "        Default is to create public repo unless --private specified"
 elif [ "$user" != "$USER" ] && [ "$ghowner" != "$ghlogin" ]; then
     if [ -n "$ghlogin" ] && [ -n "$ghpass" ]; then
-        curl -u $ghlogin:$ghpass https://api.github.com/orgs/$ghowner/repos -d "{ \"name\": \"$1\" }"
+        w=$(curl -s -u $ghlogin:$ghpass https://api.github.com/orgs/$ghowner/repos -d "{ \"name\": \"$1\" }")
     fi
     if [ -n "$bblogin" ] && [ -n "$bbpass" ]; then
-        bb create -w $bbowner $flag -u $bblogin -p $bbpass $1
+        w=$(bb create -w $bbowner $flag -u $bblogin -p $bbpass $1)
+    fi
+    if [ -n "$gllogin" ] && [ -n "$glpass" ] && [ -n "$glns" ]; then
+        w=$(curl -s --header "Private-Token: $gltoken" -X POST "https://gitlab.com/api/v4/projects" --data-urlencode "name=$1" --data-urlencode "default_branch=$GULDNAME" --data-urlencode "namespace_id=$glns")
     fi
 else
     if [ -n "$ghlogin" ] && [ -n "$ghpass" ]; then
-        curl -u $ghlogin:$ghpass https://api.github.com/user/repos -d "{ \"name\": \"$1\" }"
+        w=$(curl -s -u $ghlogin:$ghpass https://api.github.com/user/repos -d "{ \"name\": \"$1\" }")
     fi
     if [ -n "$bblogin" ] && [ -n "$bbpass" ]; then
-        bb create -w $bbowner $flag -u $bblogin -p $bbpass $1
+        w=$(bb create -w $bbowner $flag -u $bblogin -p $bbpass $1)
+    fi
+    if [ -n "$gllogin" ] && [ -n "$glpass" ] && [ -n "$glns" ]; then
+        w=$(curl -s --header "Private-Token: $gltoken" -X POST "https://gitlab.com/api/v4/projects" --data-urlencode "name=$1" --data-urlencode "default_branch=$glowner" --data-urlencode "namespace_id=$glns")
     fi
 fi
