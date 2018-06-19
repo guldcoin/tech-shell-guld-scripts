@@ -1,5 +1,5 @@
 #!/bin/bash
-preqs="gnupg2 git pass qtpass ledger python-pip curl"
+preqs="gnupg2 gpa git pass qtpass ledger python-pip curl"
 
 # detect OS
 if [ -f /etc/os-release ]; then
