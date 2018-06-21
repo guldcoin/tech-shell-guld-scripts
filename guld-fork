@@ -2,10 +2,19 @@
 GULDNAME=$(guld-name)
 GULDHOME="/home/$GULDNAME"
 ghp=$(guld-dirname-escape)
+if [ "$1" == "--private" ]; then
+  private=$1
+  shift
+elif [ "$2" == "--private" ]; then
+  private=$2
+else
+  private=""
+fi
 user=$1
 if [ ! -n "$1" ]; then
     user=$GULDNAME
 fi
+
 bblogin=$(git config --file /home/$GULDNAME/.gitconfig host.bitbucket)
 bbpass=$(pass $GULDNAME/git/bitbucket | head -n 1 2> /dev/null)
 if [ -n "$bbpass" ]; then
@@ -23,6 +32,6 @@ gltoken=$(pass $GULDNAME/git/gitlab-token | head -n 1 2> /dev/null)
 if [ -n "$ghpass" ]; then
     w=$(git remote add guld-gl "git@gitlab.com:guld/$ghp.git" 2>&1 && git fetch guld-gl && git merge guld-gl/guld)
 fi
-guld-create-repo $ghp $user
+guld-create-repo $ghp $user $private
 guld-remote-add-user-all
 guld-push-user $user 2>/dev/null

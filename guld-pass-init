@@ -11,5 +11,10 @@ fi
 if [ ! -f $GULDHOME/.password-store/$GULDNAME/.gpg-id ] && [ -n "$signingkey" ]; then
     pass init $signingkey -p $GULDNAME
 fi
+pushd $GULDHOME/.password-store/$GULDNAME
+pass git init $GULDNAME
+guld-remote-add-user $GULDNAME
+guld-fork $GULDNAME --private
 mkdir -p "$GULDHOME/.password-store/$GULDNAME/git/"
+popd
 
