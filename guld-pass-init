@@ -15,6 +15,8 @@ pushd $GULDHOME/.password-store/$GULDNAME
 pass git init $GULDNAME
 guld-remote-add-user $GULDNAME
 guld-fork $GULDNAME --private
+cd ../
+git submodule add "git@bitbucket.org:$GULDNAME/_password-store-$GULDNAME.git" $GULDNAME
 mkdir -p "$GULDHOME/.password-store/$GULDNAME/git/"
 popd
 
