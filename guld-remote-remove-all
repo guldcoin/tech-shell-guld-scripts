@@ -1,6 +1,0 @@
-#!/bin/bash
-remotes=$(git remote)
-for r in $remotes; do
-    git remote remove $r
-done
-

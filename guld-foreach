@@ -1,9 +1,0 @@
-#!/bin/bash
-if [ -n "$2" ]; then
-    ulist=$(ls "$(pwd)/$2")
-else
-    ulist=$(ls /home)
-fi
-for name in $ulist; do
-    echo $(eval "${1/$/\$}")
-done

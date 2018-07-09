@@ -1,5 +1,0 @@
-#!/bin/bash
-ulist=$(ls /home)
-for u in $ulist; do
-    guld-remote-add-user $u
-done
