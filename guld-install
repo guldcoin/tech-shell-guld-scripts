@@ -1,5 +1,5 @@
 #!/bin/bash
-preqs="gnupg2 gpa git pass qtpass ledger python-pip curl"
+preqs="curl gpg2 gpa git pass qtpass ledger pip npm"
 
 # detect OS
 if [ -f /etc/os-release ]; then
@@ -9,63 +9,58 @@ if [ -f /etc/os-release ]; then
         echo "Only Ubuntu install currently automated. Assuming you have pre-reqs: $preqs"
     else
         for req in $preqs; do
-            if [ "$req" == "gnupg2" ]; then
-                req=gpg2
-            fi
-            if [ "$req" == "python-pip" ]; then
-                req=pip
-            fi
             w=$(which $req)
+            if [ "$req" == "gpg2" ]; then
+                req="gnupg2"
+            fi
+            if [ "$req" == "pip" ]; then
+                req="python-pip"
+            fi
             if [ ! -n "$w" ]; then
-                sudo apt-get install $req
+                if [ "$req" == "npm" ]; then
+                    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+                    export NVM_DIR="$HOME/.nvm"
+                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+                    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+                    # TODO sense newer than 10 when it comes?
+                    nvm i 10
+                else
+                    sudo apt-get install -y "$req"
+                fi
             fi
         done
-        w=$(which bb)
-        if [ ! -n "$w" ]; then
-            sudo pip install bitbucket-cli
-        fi
     fi
 fi
 
-guld-pass-init
-guld-config
+npm i -g guld-cli guld-env guld-git-path guld-git-host-gitlab guld-git-host guld-git-host-bitbucket guld-fs-cli guld-env-cli guld-pass-cli guld-fs-str-replace-cli guld-git-host-cli guld-git-path-cli guld-git-cli guld-git-remote-cli guld-user-cli guld-keys-cli guld-mail-cli guld-ledger guld-git-dir guld-git-remote
 
-fork () {
-    if [ ! -d "$1/.git" ]; then
+guld-user init
+guld-mail init
+guld-keys init
+guld-pass init $(guld keys list | grep -o ^[A-Z0-9]*)
+guld-git-host init
+
+init () {
+    if [ ! -d "$1" ]; then
         mkdir -p $1
         cd $1
         git init
     fi
-    guld-fork
+    guld-git-host repo-create
 }
 
-mkdir -p $HOME/Downloads
-fork "$HOME/Downloads/guld-scripts"
-export PATH="$PATH:$HOME/Downloads/guld-scripts"
-echo "export PATH=\"$PATH:$HOME/tech/shell/guld-scripts\"" >> $HOME/.bashrc
-
-cd /home
-howner=$(stat -c '%U' /home)
-if [ "$howner" == "root" ]; then
-    sudo chown $USER:$USER .
-fi
-fork "/home"
-fork $HOME
-fork "$HOME/Documents"
-fork "$HOME/dotfiles"
-fork "$HOME/.password-store"
-fork "$HOME/Pictures"
-fork "$HOME/devices"
-fork "$HOME/io"
-fork "$HOME/keys"
+init $HOME
+init "$HOME/Documents"
+init "$HOME/dotfiles"
+init "$HOME/.password-store"
+init "$HOME/Pictures"
+init "$HOME/devices"
+init "$HOME/io"
+init "$HOME/keys"
 cd "$HOME/keys"
 git submodule update --init pgp
 git submodule update --init ssh
-fork "$HOME/ledger"
-fork "$HOME/tech"
-cd "$HOME/tech"
-git submodule update --init shell
-cd shell
-git submodule update --init guld-scripts
-fork "$HOME/.blocktree"
+init "$HOME/ledger"
+init "$HOME/tech"
+init "$HOME/.blocktree"
 
