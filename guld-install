@@ -63,27 +63,32 @@ init () {
     fi
     guld-git-remote add
     git pull guld guld
-    git checkout -b $uname 2&> /dev/null
-    git checkout $uname 2&> /dev/null
-    git push $uname $uname
+    git checkout -b $2 2&> /dev/null
+    git checkout $2 2&> /dev/null
+    git push $2 $2
 }
 
-init $HOME
-init "$HOME/Documents"
-init "$HOME/dotfiles"
-init "$HOME/.password-store"
-init "$HOME/Pictures"
-init "$HOME/devices"
-init "$HOME/io"
-init "$HOME/keys"
+mkdir -p "$HOME/dotfiles/guld"
+cd "$HOME/dotfiles/guld"
+git remote add guld https://bitbucket.org/guld/dotfiles-guld.git
+git pull guld guld
+
+init $HOME $uname
+init "$HOME/dotfiles" $uname
+init "$HOME/Documents" $uname
+init "$HOME/.password-store" $uname
+init "$HOME/Pictures" $uname
+init "$HOME/devices" $uname
+init "$HOME/io" $uname
+init "$HOME/keys" $uname
 #cd "$HOME/keys"
 #git submodule update --init pgp
 #git submodule update --init ssh
-init "$HOME/keys/pgp"
+init "$HOME/keys/pgp" $uname
 mkdir -p "$HOME/keys/pgp/$uname"
 guld-keys export -a >> "$HOME/keys/pgp/$uname/$ukey.asc"
-init "$HOME/keys/ssh"
-init "$HOME/ledger"
-init "$HOME/ledger/GULD"
-init "$HOME/tech"
-init "$HOME/.blocktree"
+init "$HOME/keys/ssh" $uname
+init "$HOME/ledger" $uname
+init "$HOME/ledger/GULD" $uname
+init "$HOME/tech" $uname
+init "$HOME/.blocktree" $uname
