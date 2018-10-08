@@ -51,18 +51,20 @@ guld-git-host init
 init () {
     if [ ! -d "$1" ]; then
         mkdir -p $1
-        cd $1
-        git init
     fi
-    guld-git-host repo-create
+    cd $1
+    git init
+    guld-git-host repo-create 2&> /dev/null
+    guld-git-remote delete
     if [ "$1" = "$HOME" ]; then
+        echo "adding perspective at $1"
         git remote add guld https://bitbucket.org/guld/perspective.git
         git checkout -b guld || git checkout guld
     fi
-    guld-git-remote delete
     guld-git-remote add
     git pull guld guld
-    $(git checkout -b $uname || git checkout $uname 2&> /dev/null)
+    git checkout -b $uname 2&> /dev/null
+    git checkout $uname 2&> /dev/null
     git push $uname $uname
 }
 
