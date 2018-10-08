@@ -32,12 +32,20 @@ if [ -f /etc/os-release ]; then
     fi
 fi
 
-npm i -g guld-cli guld-env guld-git-path guld-git-host-gitlab guld-git-host guld-git-host-bitbucket guld-fs-cli guld-env-cli guld-pass-cli guld-fs-str-replace-cli guld-git-host-cli guld-git-path-cli guld-git-cli guld-git-remote-cli guld-user-cli guld-keys-cli guld-mail-cli guld-ledger guld-git-dir guld-git-remote
+npm i -g rimraf guld-cli guld-env guld-git-path guld-git-host-gitlab guld-git-host guld-git-host-bitbucket guld-fs-cli guld-env-cli guld-pass-cli guld-fs-str-replace-cli guld-git-host-cli guld-git-path-cli guld-git-cli guld-git-remote-cli guld-user-cli guld-keys-cli guld-mail-cli guld-ledger guld-git-dir guld-git-remote guld-cli-run
+
+mkdir -p $HOME/dotfiles $HOME/ledger/GULD $HOME/keys/pgp $HOME/keys/ssh
+cd $HOME
+git init
 
 guld-user init
+uname=$(guld-user name)
+mkdir -p $HOME/dotfiles/$uname $HOME/ledger/GULD/$uname $HOME/keys/pgp $HOME/keys/ssh
+mkdir -p $HOME/.password-store/$uname/git/
 guld-mail init
 guld-keys init
-guld-pass init $(guld keys list | grep -o ^[A-Z0-9]*)
+ukey=$(guld keys list | grep -o ^[A-Z0-9]*)
+guld-pass init $ukey
 guld-git-host init
 
 init () {
@@ -47,6 +55,15 @@ init () {
         git init
     fi
     guld-git-host repo-create
+    if [ "$1" = "$HOME" ]; then
+        git remote add guld https://bitbucket.org/guld/perspective.git
+        git checkout -b guld || git checkout guld
+    fi
+    guld-git-remote delete
+    guld-git-remote add
+    git pull guld guld
+    $(git checkout -b $uname || git checkout $uname 2&> /dev/null)
+    git push $uname $uname
 }
 
 init $HOME
@@ -57,10 +74,14 @@ init "$HOME/Pictures"
 init "$HOME/devices"
 init "$HOME/io"
 init "$HOME/keys"
-cd "$HOME/keys"
-git submodule update --init pgp
-git submodule update --init ssh
+#cd "$HOME/keys"
+#git submodule update --init pgp
+#git submodule update --init ssh
+init "$HOME/keys/pgp"
+mkdir -p "$HOME/keys/pgp/$uname"
+guld-keys export -a >> "$HOME/keys/pgp/$uname/$ukey.asc"
+init "$HOME/keys/ssh"
 init "$HOME/ledger"
+init "$HOME/ledger/GULD"
 init "$HOME/tech"
 init "$HOME/.blocktree"
-
